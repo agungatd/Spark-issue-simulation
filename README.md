@@ -32,16 +32,16 @@ This repository provides an end-to-end simulation of 10 common Apache Spark prob
    ```bash
    docker-compose up
    ```
-   - The Spark master UI will be available at [http://localhost:8080](http://localhost:8080).
+   - The Spark master UI will be available at [http://localhost:9090](http://localhost:9090).
    - The first worker’s UI will be available at [http://localhost:8081](http://localhost:8081).
 
 ## Running the Simulations
 
-Each simulation script can be submitted to the Spark cluster. For example, to run the Task Serialization Error simulation, use:
+Each simulation script can be submitted to the Spark cluster. For example, to run the Task Serialization Error simulation from your local, use:
 ```bash
-spark-submit simulations/serialization_error.py --master spark://spark-master:7077
+docker exec spark-master /opt/spark/bin/spark-submit --master spark://spark-master:7077 simulations/1_data_skew.py
 ```
-Replace `serialization_error.py` with the appropriate simulation file name. Ensure that the Spark master URL matches your Docker Compose configuration.
+Replace `1_data_skew.py` with the appropriate simulation file name. Ensure that the Spark master URL matches your Docker Compose configuration.
 
 ## Simulation Examples
 

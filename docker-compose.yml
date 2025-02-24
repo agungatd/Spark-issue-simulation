@@ -9,6 +9,8 @@ services:
       - "7077:7077"  # Spark Master port
     volumes:
       - ./data:/opt/spark/data
+      - ./simulations:/opt/spark/work-dir/simulations
+      - ./scripts:/opt/spark/work-dir/scripts
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -26,13 +28,11 @@ services:
       - spark-master
     ports:
       - "9091:8081"  # Worker 1 Web UI
-    volumes:
-      - ./data:/opt/spark/data
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_CORES=2
-      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
       - SPARK_WORKER_WEBUI_PORT=8081
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
@@ -42,37 +42,34 @@ services:
     networks:
       - spark-network
 
-  # spark-worker-2:
-  #   image: apache/spark:3.5.3
-  #   container_name: spark-worker-2
-  #   depends_on:
-  #     - spark-master
-  #   ports:
-  #     - "9092:8081"  # Worker 2 Web UI
-  #   volumes:
-  #     - ./data:/opt/spark/data
-  #   environment:
-  #     - SPARK_MODE=worker
-  #     - SPARK_MASTER_URL=spark://spark-master:7077
-  #     - SPARK_WORKER_CORES=1
-  #     - SPARK_WORKER_MEMORY=1g
-  #     - SPARK_WORKER_WEBUI_PORT=8081
-  #     - SPARK_RPC_AUTHENTICATION_ENABLED=no
-  #     - SPARK_RPC_ENCRYPTION_ENABLED=no
-  #     - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-  #     - SPARK_SSL_ENABLED=no
-  #   command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
-  #   networks:
-  #     - spark-network
+  spark-worker-2:
+    image: apache/spark:3.5.3
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "9092:8081"  # Worker 2 Web UI
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
+    networks:
+      - spark-network
 
   # spark-worker-3:
   #   image: apache/spark:3.5.3
+  #   container_name: spark-worker-3
   #   depends_on:
   #     - spark-master
   #   ports:
   #     - "9093:8081"  # Worker 3 Web UI
-  #   volumes:
-  #     - ./data:/opt/spark/data
   #   environment:
   #     - SPARK_MODE=worker
   #     - SPARK_MASTER_URL=spark://spark-master:7077
