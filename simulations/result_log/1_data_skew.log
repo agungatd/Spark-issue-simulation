@@ -1,0 +1,55 @@
+INFO:__main__:
+=== Problem 1: Data Skew ===
+INFO:__main__:Original data distribution:
++------+-----+
+|   key|count|
++------+-----+
+| KEY_3|   27|
+| KEY_7|   23|
+| KEY_9|   22|
+| KEY_6|   17|
+| KEY_2|   16|
+| KEY_1|  819|
+|KEY_10|   19|
+| KEY_5|   19|
+| KEY_8|   13|
+| KEY_4|   25|
++------+-----+
+
+INFO:__main__:
+Slow approach with skewed data:
++------+-----+
+|   key|total|
++------+-----+
+| KEY_3| 1427|
+| KEY_7| 1271|
+| KEY_9| 1143|
+| KEY_6|  698|
+| KEY_2|  408|
+| KEY_1|41050|
+|KEY_10|  952|
+| KEY_5|  931|
+| KEY_8|  503|
+| KEY_4| 1033|
++------+-----+
+
+INFO:__main__:
+Slow approach with skewed data:
+INFO:__main__:Time taken: 0.74 seconds
+INFO:__main__:
+Solution - Salted keys approach:
+INFO:__main__:Time taken: 0.08 seconds
++------------+-----------+
+|original_key|final_total|
++------------+-----------+
+|       KEY_3|       1427|
+|       KEY_7|       1271|
+|       KEY_9|       1143|
+|       KEY_6|        698|
+|       KEY_2|        408|
+|       KEY_1|      42002|
+|       KEY_5|        931|
+|       KEY_8|        503|
+|       KEY_4|       1033|
++------------+-----------+
+

@@ -1,0 +1,22 @@
+INFO:__main__:
+=== Problem 3: Cartesian Product ===
+INFO:__main__:Bad approach - unintentional cartesian join:
+INFO:__main__:Row count: 1000000
+INFO:__main__:Time taken: 3.45 seconds
+INFO:__main__:
+Solution - Using proper join condition:
+INFO:__main__:Row count: 1000
++---+---------+---------+
+| id|   value1|   value2|
++---+---------+---------+
+|964|value_964|value_964|
+|541|value_541|value_541|
+|558|value_558|value_558|
+|730|value_730|value_730|
+|938|value_938|value_938|
++---+---------+---------+
+only showing top 5 rows
+
+INFO:__main__:Time taken: 2.84 seconds
+INFO:__main__:
+=== End of Problem 3: Cartesian Product ===

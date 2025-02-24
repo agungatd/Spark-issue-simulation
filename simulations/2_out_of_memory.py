@@ -7,10 +7,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize Spark Session
+# uncomment config below to solve the OOM error
 spark = SparkSession.builder \
-    .appName("SparkProblems-OOM") \
+    .appName("SparkProblems-OOM-Solved") \
     .config("spark.driver.memory", "4g") \
     .getOrCreate()
+
+# comment spark builder below if uncommented the above builder.
+# spark = SparkSession.builder \
+#     .appName("SparkProblems-OOM") \
+#     .getOrCreate()
 
 
 # Problem 2: Out of Memory Error
@@ -24,16 +30,9 @@ def simulate_oom_error(df):
         df.collect()
         logger.info("Successfully collected data")
     except Exception as e:
-        logger.error(f"Error occurred: {str(e)}")
-    logger.info(f"Time taken: {time.time() - start:.2f} seconds")
-
-
-def sampling_solution(df):  
-    # Solution 1: Use sampling
-    logger.info("\nSolution 1 - Using sampling:")
-    start = time.time()
-    df.sample(0.01).show(5)
-    logger.info(f"Time taken: {time.time() - start:.2f} seconds")
+        logger.info(f"Error occurred: {str(e)}")
+    finally:
+        logger.info(f"Time taken: {time.time() - start:.2f} seconds")
 
 
 def agg_solution(df):
@@ -49,7 +48,6 @@ if __name__ == "__main__":
     # Create large dataset
     large_data = [(random.randint(1,8), f"value_{i}" * 1000) for i in range(17000)]
     df = spark.createDataFrame(large_data, ["id", "large_text"])
-    simulate_oom_error(df)  # comment this if got OOM Error
-    # sampling_solution(df)
-    # agg_solution(df)
+    simulate_oom_error(df)
+    agg_solution(df)
     logger.info("\n=== End of Problem 2: Out of Memory Error ===")
