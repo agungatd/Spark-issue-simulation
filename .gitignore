@@ -1,2 +1,3 @@
 data/
 *.parquet
+*data_gen.py

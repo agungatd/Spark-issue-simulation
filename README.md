@@ -47,45 +47,47 @@ Replace `1_data_skew.py` with the appropriate simulation file name. Ensure that 
 
 The repository covers the following simulations:
 
-1. **Task Serialization Error**  
-   *Problem:* Non-serializable objects in lambda functions causing errors.  
-   *Fix:* Use broadcast variables to safely share values.
+1. **Data Skew**  
+   *Problem:* When data is unevenly distributed across partitions, causing some executors to process much more data than others.  
+   *Solution:* Implemented key salting to distribute skewed keys across multiple partitions.
 
-2. **Data Skew in Joins**  
-   *Problem:* Overloaded partitions during join operations due to skewed key distributions.  
-   *Fix:* Introduce a salting mechanism to distribute the keys more evenly.
+2. **Out Of Memory Error**  
+   *Problem:* Occurs when trying to collect too much data to the driver.  
+   *Solution:*
+      - Using sampling for analysis
+      - Implementing proper aggregations instead of collecting all data
 
-3. **OutOfMemoryError from Inefficient Grouping**  
-   *Problem:* Using `groupByKey` on large datasets leads to memory issues.  
-   *Fix:* Replace with `reduceByKey` for local pre-aggregation.
+3. **Cartesian Product**
+   *Problem:* Unintentional cross joins that can cause exponential data growth.
+   *Solution:* Implemented proper join conditions and demonstrated the difference in output size.
 
-4. **Improper Partitioning Causing Bottlenecks**  
-   *Problem:* Too few partitions limit parallelism and slow down processing.  
-   *Fix:* Increase partitions using `repartition` or optimize with `coalesce`.
+4. **Shuffle Partition Issues**  
+   *Problem:* Incorrect number of shuffle partitions leading to poor performance.  
+   *Solution:* Dynamic partition calculation based on data size. Includes best practices for partition sizing (100MB-200MB per partition)
 
 5. **UDF Performance Issues**  
    *Problem:* Python UDFs incur serialization overhead and reduce performance.  
-   *Fix:* Replace UDFs with native Spark SQL functions where possible.
+   *Solution:* Replace UDFs with native Spark SQL functions where possible.
 
 6. **Insufficient Driver Memory and Excessive Garbage Collection**  
    *Problem:* Collecting massive datasets to the driver causes memory exhaustion.  
-   *Fix:* Use actions like `take()` to limit data collection.
+   *Solution:* Use actions like `take()` to limit data collection.
 
 7. **Shuffle Spill Due to Insufficient Memory**  
    *Problem:* Heavy shuffle operations may lead to spills on disk and performance degradation.  
-   *Fix:* Optimize Spark configuration settings to better handle shuffles.
+   *Solution:* Optimize Spark configuration settings to better handle shuffles.
 
 8. **Inefficient Caching Leading to Repeated Computations**  
    *Problem:* Recomputing the same transformations multiple times without caching.  
-   *Fix:* Cache intermediate results to avoid redundant computations.
+   *Solution:* Cache intermediate results to avoid redundant computations.
 
 9. **Too Many Small Files Leading to Performance Overhead**  
    *Problem:* Numerous small files create a large number of tasks and I/O overhead.  
-   *Fix:* Combine small files by reducing partitions with `coalesce`.
+   *Solution:* Combine small files by reducing partitions with `coalesce`.
 
 10. **Spark SQL Partition Pruning Not Applied**  
     *Problem:* Inadequate partition filtering leads to unnecessary data reads.  
-    *Fix:* Use early filtering or partition-aware reads to enforce pruning.
+    *Solution:* Use early filtering or partition-aware reads to enforce pruning.
 
 ## Contributing
 
