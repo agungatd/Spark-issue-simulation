@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import rand
 import logging
 import time
 import random
@@ -6,48 +7,79 @@ import random
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Spark Session
-# uncomment config below to solve the OOM error
+# Create a Spark session - intentionally using minimal memory
 spark = SparkSession.builder \
-    .appName("SparkProblems-OOM-Solved") \
-    .config("spark.driver.memory", "4g") \
+    .appName("Spark Memory Issues (OOM)") \
+    .config("spark.driver.memory", "1g") \
+    .config("spark.executor.memory", "1g") \
     .getOrCreate()
 
-# comment spark builder below if uncommented the above builder.
-# spark = SparkSession.builder \
-#     .appName("SparkProblems-OOM") \
-#     .getOrCreate()
+print("1. DEMONSTRATING SPARK MEMORY ISSUES")
+print("===================================")
 
+# Create a dataset that will cause memory problems
+try:
+    print("Creating a large dataset with many columns...")
+    
+    # Generate a large dataset
+    num_rows = 1000000
+    
+    # Create base dataframe
+    df = spark.range(0, num_rows)
+    
+    # Create many columns to consume memory
+    for i in range(100):
+        df = df.withColumn(f"random_col_{i}", rand())
+    
+    # Perform a memory-intensive operation - collecting all data to driver
+    print("Attempting to collect() the entire large dataset to driver...")
+    result = df.collect()  # This will likely cause an OOM error
+    
+    print(f"Collected {len(result)} rows with {len(df.columns)} columns")
 
-# Problem 2: Out of Memory Error
-def simulate_oom_error(df):
+except Exception as e:
+    print(f"ERROR OCCURRED: {type(e).__name__}: {str(e)}")
+    print("\nThis is a common Spark memory issue: OutOfMemoryError")
 
-    # Problem: Collecting large dataset to driver
-    logger.info("Bad approach - collecting large dataset to driver:")
-    start = time.time()
-    try:
-        # This might cause OOM
-        df.collect()
-        logger.info("Successfully collected data")
-    except Exception as e:
-        logger.info(f"Error occurred: {str(e)}")
-    finally:
-        logger.info(f"Time taken: {time.time() - start:.2f} seconds")
+print("\n2. FIXING THE MEMORY ISSUES")
+print("===================================")
 
+# Solution 1: Increase memory (in a real cluster, this would be done via configuration)
+print("Solution 1: Increase memory allocation")
+print("In a real environment, you would increase:")
+print("  - spark.driver.memory (for driver)")
+print("  - spark.executor.memory (for executors)")
+print("  - spark.memory.fraction (memory fraction used for execution)")
 
-def agg_solution(df):
-    # Solution 2: Use aggregation instead of collect
-    logger.info("\nSolution 2 - Using aggregation:")
-    start = time.time()
-    df.groupBy("id").count().show(5)
-    logger.info(f"Time taken: {time.time() - start:.2f} seconds")
+# Solution 2: Avoid collect() on large datasets
+print("\nSolution 2: Avoid collecting large datasets to driver")
+print("Instead of df.collect(), use:")
+print("  - df.take(n) to get only n rows")
+print("  - df.sample().collect() to get a sample")
 
+# Demonstrate solution with take()
+print("\nDemonstrating take(10) instead of collect():")
+sample_result = df.take(10)
+print(f"Successfully took 10 rows with {len(df.columns)} columns")
 
-if __name__ == "__main__":
-    logger.info("\n=== Problem 2: Out of Memory Error ===")
-    # Create large dataset
-    large_data = [(random.randint(1,8), f"value_{i}" * 1000) for i in range(17000)]
-    df = spark.createDataFrame(large_data, ["id", "large_text"])
-    simulate_oom_error(df)
-    agg_solution(df)
-    logger.info("\n=== End of Problem 2: Out of Memory Error ===")
+# Solution 3: Reduce the number of columns/perform projection earlier
+print("\nSolution 3: Reduce the number of columns early in the pipeline")
+df_reduced = df.select("id", "random_col_0", "random_col_1")
+sample_result_2 = df_reduced.take(10)
+print(f"Successfully took 10 rows with only {len(df_reduced.columns)} columns")
+
+# Solution 4: Repartition to avoid data skew
+print("\nSolution 4: Repartition to distribute data more evenly")
+df_repartitioned = df.repartition(20)  # Distribute to more partitions
+print("Data repartitioned to 20 partitions to distribute processing")
+
+# Solution 5: Use disk spilling if needed
+print("\nSolution 5: Configure disk spilling for large operations")
+print("Set these configurations:")
+print("  - spark.memory.storageFraction=0.5")
+print("  - spark.memory.offHeap.enabled=true (if available)")
+print("  - spark.memory.offHeap.size to allow off-heap storage")
+
+# Cleanup
+spark.stop()
+print("\nSpark session stopped")

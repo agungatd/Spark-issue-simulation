@@ -1,0 +1,155 @@
+1. DEMONSTRATING SPARK MEMORY ISSUES
+===================================
+Creating a large dataset with many columns...
+Attempting to collect() the entire large dataset to driver...
+ERROR OCCURRED: Py4JJavaError: An error occurred while calling o229.collectToPython.
+: org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 0.0 failed 4 times, most recent failure: Lost task 0.6 in stage 0.0 (TID 12) (172.18.0.4 executor 6): java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.nio.HeapByteBuffer.<init>(Unknown Source)
+	at java.base/java.nio.ByteBuffer.allocate(Unknown Source)
+	at org.apache.spark.serializer.SerializerHelper$.$anonfun$serializeToChunkedBuffer$1(SerializerHelper.scala:40)
+	at org.apache.spark.serializer.SerializerHelper$.$anonfun$serializeToChunkedBuffer$1$adapted(SerializerHelper.scala:40)
+	at org.apache.spark.serializer.SerializerHelper$$$Lambda$884/0x000000084076c040.apply(Unknown Source)
+	at org.apache.spark.util.io.ChunkedByteBufferOutputStream.allocateNewChunkIfNeeded(ChunkedByteBufferOutputStream.scala:87)
+	at org.apache.spark.util.io.ChunkedByteBufferOutputStream.write(ChunkedByteBufferOutputStream.scala:75)
+	at java.base/java.io.ObjectOutputStream$BlockDataOutputStream.write(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.write(Unknown Source)
+	at org.apache.spark.util.Utils$.$anonfun$writeByteBuffer$1(Utils.scala:209)
+	at org.apache.spark.util.Utils$.$anonfun$writeByteBuffer$1$adapted(Utils.scala:209)
+	at org.apache.spark.util.Utils$$$Lambda$887/0x000000084076e040.apply(Unknown Source)
+	at org.apache.spark.util.Utils$.writeByteBufferImpl(Utils.scala:187)
+	at org.apache.spark.util.Utils$.writeByteBuffer(Utils.scala:209)
+	at org.apache.spark.util.io.ChunkedByteBuffer.$anonfun$writeExternal$2(ChunkedByteBuffer.scala:103)
+	at org.apache.spark.util.io.ChunkedByteBuffer.$anonfun$writeExternal$2$adapted(ChunkedByteBuffer.scala:103)
+	at org.apache.spark.util.io.ChunkedByteBuffer$$Lambda$886/0x000000084076e840.apply(Unknown Source)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.io.ChunkedByteBuffer.writeExternal(ChunkedByteBuffer.scala:103)
+	at java.base/java.io.ObjectOutputStream.writeExternalData(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.defaultWriteFields(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeSerialData(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeArray(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject(Unknown Source)
+	at org.apache.spark.serializer.JavaSerializationStream.writeObject(JavaSerializer.scala:46)
+
+Driver stacktrace:
+	at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:2856)
+	at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:2792)
+	at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2$adapted(DAGScheduler.scala:2791)
+	at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:62)
+	at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:55)
+	at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:49)
+	at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:2791)
+	at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1(DAGScheduler.scala:1247)
+	at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1$adapted(DAGScheduler.scala:1247)
+	at scala.Option.foreach(Option.scala:407)
+	at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:1247)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:3060)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2994)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2983)
+	at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)
+	at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:989)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2393)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2414)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2433)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2458)
+	at org.apache.spark.rdd.RDD.$anonfun$collect$1(RDD.scala:1049)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.RDD.collect(RDD.scala:1048)
+	at org.apache.spark.sql.execution.SparkPlan.executeCollect(SparkPlan.scala:448)
+	at org.apache.spark.sql.Dataset.$anonfun$collectToPython$1(Dataset.scala:4149)
+	at org.apache.spark.sql.Dataset.$anonfun$withAction$2(Dataset.scala:4323)
+	at org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:546)
+	at org.apache.spark.sql.Dataset.$anonfun$withAction$1(Dataset.scala:4321)
+	at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$6(SQLExecution.scala:125)
+	at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:201)
+	at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:108)
+	at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:900)
+	at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:66)
+	at org.apache.spark.sql.Dataset.withAction(Dataset.scala:4321)
+	at org.apache.spark.sql.Dataset.collectToPython(Dataset.scala:4146)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+	at py4j.Gateway.invoke(Gateway.java:282)
+	at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+	at py4j.commands.CallCommand.execute(CallCommand.java:79)
+	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.nio.HeapByteBuffer.<init>(Unknown Source)
+	at java.base/java.nio.ByteBuffer.allocate(Unknown Source)
+	at org.apache.spark.serializer.SerializerHelper$.$anonfun$serializeToChunkedBuffer$1(SerializerHelper.scala:40)
+	at org.apache.spark.serializer.SerializerHelper$.$anonfun$serializeToChunkedBuffer$1$adapted(SerializerHelper.scala:40)
+	at org.apache.spark.serializer.SerializerHelper$$$Lambda$884/0x000000084076c040.apply(Unknown Source)
+	at org.apache.spark.util.io.ChunkedByteBufferOutputStream.allocateNewChunkIfNeeded(ChunkedByteBufferOutputStream.scala:87)
+	at org.apache.spark.util.io.ChunkedByteBufferOutputStream.write(ChunkedByteBufferOutputStream.scala:75)
+	at java.base/java.io.ObjectOutputStream$BlockDataOutputStream.write(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.write(Unknown Source)
+	at org.apache.spark.util.Utils$.$anonfun$writeByteBuffer$1(Utils.scala:209)
+	at org.apache.spark.util.Utils$.$anonfun$writeByteBuffer$1$adapted(Utils.scala:209)
+	at org.apache.spark.util.Utils$$$Lambda$887/0x000000084076e040.apply(Unknown Source)
+	at org.apache.spark.util.Utils$.writeByteBufferImpl(Utils.scala:187)
+	at org.apache.spark.util.Utils$.writeByteBuffer(Utils.scala:209)
+	at org.apache.spark.util.io.ChunkedByteBuffer.$anonfun$writeExternal$2(ChunkedByteBuffer.scala:103)
+	at org.apache.spark.util.io.ChunkedByteBuffer.$anonfun$writeExternal$2$adapted(ChunkedByteBuffer.scala:103)
+	at org.apache.spark.util.io.ChunkedByteBuffer$$Lambda$886/0x000000084076e840.apply(Unknown Source)
+	at scala.collection.IndexedSeqOptimized.foreach(IndexedSeqOptimized.scala:36)
+	at scala.collection.IndexedSeqOptimized.foreach$(IndexedSeqOptimized.scala:33)
+	at scala.collection.mutable.ArrayOps$ofRef.foreach(ArrayOps.scala:198)
+	at org.apache.spark.util.io.ChunkedByteBuffer.writeExternal(ChunkedByteBuffer.scala:103)
+	at java.base/java.io.ObjectOutputStream.writeExternalData(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.defaultWriteFields(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeSerialData(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeOrdinaryObject(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeArray(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject0(Unknown Source)
+	at java.base/java.io.ObjectOutputStream.writeObject(Unknown Source)
+	at org.apache.spark.serializer.JavaSerializationStream.writeObject(JavaSerializer.scala:46)
+
+
+This is a common Spark memory issue: OutOfMemoryError
+
+2. FIXING THE MEMORY ISSUES
+===================================
+Solution 1: Increase memory allocation
+In a real environment, you would increase:
+  - spark.driver.memory (for driver)
+  - spark.executor.memory (for executors)
+  - spark.memory.fraction (memory fraction used for execution)
+
+Solution 2: Avoid collecting large datasets to driver
+Instead of df.collect(), use:
+  - df.take(n) to get only n rows
+  - df.sample().collect() to get a sample
+
+Demonstrating take(10) instead of collect():
+Successfully took 10 rows with 101 columns
+
+Solution 3: Reduce the number of columns early in the pipeline
+Successfully took 10 rows with only 3 columns
+
+Solution 4: Repartition to distribute data more evenly
+Data repartitioned to 20 partitions to distribute processing
+
+Solution 5: Configure disk spilling for large operations
+Set these configurations:
+  - spark.memory.storageFraction=0.5
+  - spark.memory.offHeap.enabled=true (if available)
+  - spark.memory.offHeap.size to allow off-heap storage
+
+Spark session stopped
