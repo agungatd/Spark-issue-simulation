@@ -1,0 +1,48 @@
+1. DEMONSTRATING LINEAGE BLOATING ISSUES
+===================================
+Creating sample dataset...
+Sample data created. Schema:
+root
+ |-- id: long (nullable = true)
+ |-- value: string (nullable = true)
+
+
+Creating a dataframe with very long transformation lineage...
+This might slow down execution due to long lineage tracking...
+Executing action with long lineage...
+Execution with long lineage took 8.44 seconds
+
+Analyzing execution plan with long lineage...
+Plan analysis took 0.21 seconds
+Plan length: 222 lines
+
+2. FIXING THE LINEAGE BLOATING ISSUES
+===================================
+Solution 1: Use checkpoint() to truncate lineage
+Execution with checkpoints took 6.77 seconds
+Improvement: 1.25x faster
+Plan analysis took 0.05 seconds
+Plan analysis improvement: 4.06x faster
+
+Solution 2: Use cache()/persist() strategically
+Execution with caching took 7.36 seconds
+
+Solution 3: Convert to DataFrame explicitly
+Execution with explicit conversion took 6.10 seconds
+
+Solution 4: Better pipeline design with fewer transformations
+Execution with efficient pipeline took 0.23 seconds
+Improvement over original: 35.98x faster
+
+Solution 5: Use explain() to analyze and optimize pipelines
+When developing, analyze plans and cut lineage before they get too complex:
+
+Execution plan for efficient pipeline:
+== Physical Plan ==
+*(1) Project [id#0L, value#1, col_0#75873L, col_1#75874L, col_2#75875L, col_3#75876L, col_4#75877L, col_5#75878L, col_6#75879L, col_7#75880L, col_8#75881L, col_9#75882L, col_10#75883L, col_11#75884L, col_12#75885L, col_13#75886L, col_14#75887L, col_15#75888L, col_16#75889L, col_17#75890L, col_18#75891L, col_19#75892L, col_20#75893L, col_21#75894L, ... 33 more fields]
++- *(1) Project [id#0L, value#1, ((id#0L + 0) % 100) AS col_0#75873L, ((id#0L + 1) % 100) AS col_1#75874L, ((id#0L + 2) % 100) AS col_2#75875L, ((id#0L + 3) % 100) AS col_3#75876L, ((id#0L + 4) % 100) AS col_4#75877L, ((id#0L + 5) % 100) AS col_5#75878L, ((id#0L + 6) % 100) AS col_6#75879L, ((id#0L + 7) % 100) AS col_7#75880L, ((id#0L + 8) % 100) AS col_8#75881L, ((id#0L + 9) % 100) AS col_9#75882L, ((id#0L + 10) % 100) AS col_10#75883L, ((id#0L + 11) % 100) AS col_11#75884L, ((id#0L + 12) % 100) AS col_12#75885L, ((id#0L + 13) % 100) AS col_13#75886L, ((id#0L + 14) % 100) AS col_14#75887L, ((id#0L + 15) % 100) AS col_15#75888L, ((id#0L + 16) % 100) AS col_16#75889L, ((id#0L + 17) % 100) AS col_17#75890L, ((id#0L + 18) % 100) AS col_18#75891L, ((id#0L + 19) % 100) AS col_19#75892L, ((id#0L + 20) % 100) AS col_20#75893L, ((id#0L + 21) % 100) AS col_21#75894L, ... 28 more fields]
+   +- *(1) Scan ExistingRDD[id#0L,value#1]
+
+
+
+Spark session stopped
