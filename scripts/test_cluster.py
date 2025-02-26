@@ -13,10 +13,10 @@ def write_test_data(df, path):
     os.makedirs(path, exist_ok=True)
 
     df.write \
-        .mode("overwrite") \
-        .option("compression", "snappy") \
         .partitionBy("value") \
+        .mode("overwrite") \
         .parquet(path)
+        # .option("compression", "snappy") \
 
 def read_test_data(spark, path, schema):
     # Read back with schema validation
@@ -59,7 +59,8 @@ def test_cluster_connectivity():
     
     # Test data persistence
     print("\n6. Testing data persistence...")
-    test_path = os.getenv("SPARK_TEST_PATH", "/opt/spark/work-dir")
+    test_path = os.getenv("SPARK_TEST_PATH", "hdfs://namenode:9000/user/spark/checkpoints")
+    spark.sparkContext.setCheckpointDir(test_path)
     write_test_data(df, test_path)
     read_back = read_test_data(spark, test_path, df.schema)
     print(f"Successfully wrote and read back {read_back.count():,} rows")

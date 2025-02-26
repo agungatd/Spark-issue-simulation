@@ -57,11 +57,11 @@ The repository covers the following simulations:
       - Using sampling for analysis
       - Implementing proper aggregations instead of collecting all data
 
-3. **Cartesian Product**
+3. **Complex Join Issue**
    *Problem:* Unintentional cross joins that can cause exponential data growth.
    *Solution:* Implemented proper join conditions and demonstrated the difference in output size.
 
-4. **Shuffle Partition Issues**  
+4. **Excessive Shuffling Issues**  
    *Problem:* Incorrect number of shuffle partitions leading to poor performance.  
    *Solution:* Dynamic partition calculation based on data size. Includes best practices for partition sizing (100MB-200MB per partition)
 
@@ -69,25 +69,25 @@ The repository covers the following simulations:
    *Problem:* Python UDFs incur serialization overhead and reduce performance.  
    *Solution:* Replace UDFs with native Spark SQL functions where possible.
 
-6. **Insufficient Driver Memory and Excessive Garbage Collection**  
+6. **Null Values Handling**  
    *Problem:* Collecting massive datasets to the driver causes memory exhaustion.  
    *Solution:* Use actions like `take()` to limit data collection.
 
-7. **Shuffle Spill Due to Insufficient Memory**  
+7. **Job Lineage Bloating**  
    *Problem:* Heavy shuffle operations may lead to spills on disk and performance degradation.  
    *Solution:* Optimize Spark configuration settings to better handle shuffles.
 
-8. **Inefficient Caching Leading to Repeated Computations**  
+8. **Spark Streaming Issues**  
    *Problem:* Recomputing the same transformations multiple times without caching.  
    *Solution:* Cache intermediate results to avoid redundant computations.
 
-9. **Too Many Small Files Leading to Performance Overhead**  
-   *Problem:* Numerous small files create a large number of tasks and I/O overhead.  
-   *Solution:* Combine small files by reducing partitions with `coalesce`.
-
-10. **Spark SQL Partition Pruning Not Applied**  
+9. **Broadcast Variable Misuse**  
     *Problem:* Inadequate partition filtering leads to unnecessary data reads.  
     *Solution:* Use early filtering or partition-aware reads to enforce pruning.
+
+10. **Too Many Small Files Leading to Performance Overhead**  
+   *Problem:* Numerous small files create a large number of tasks and I/O overhead.  
+   *Solution:* Combine small files by reducing partitions with `coalesce`.
 
 ## Contributing
 

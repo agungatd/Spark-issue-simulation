@@ -4,3 +4,8 @@ tmp/
 datanode/*
 namenode/*
 *.parquet
+simulations/result_log/serialization.log
+simulations/result_log/shuffle_partition.log
+simulations/serialization.py
+simulations/shuffle_partition.py
+troubleshoot.md

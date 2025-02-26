@@ -12,7 +12,7 @@ services:
       - ./data:/opt/spark/data
       - ./simulations:/opt/spark/work-dir/simulations
       - ./scripts:/opt/spark/work-dir/scripts
-      - ./tmp:/opt/spark/work-dir/tmp
+      - ./tmp:/tmp
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
