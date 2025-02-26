@@ -28,4 +28,6 @@ echo "======================================="
 echo "🔧 Starting HDFS NameNode Service..."
 echo "======================================="
 hdfs namenode
+hdfs dfs -mkdir /checkpoints
+hdfs dfs -chown spark:supergroup /checkpoints
 
