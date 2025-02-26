@@ -48,46 +48,46 @@ Replace `1_data_skew.py` with the appropriate simulation file name. Ensure that 
 The repository covers the following simulations:
 
 1. **Data Skew**  
-   *Problem:* When data is unevenly distributed across partitions, causing some executors to process much more data than others.  
-   *Solution:* Implemented key salting to distribute skewed keys across multiple partitions.
+   *Problem:* Uneven data distribution across partitions, causing some executors to process significantly more data than others.  
+   *Solution:* Use key salting to distribute skewed data more evenly across partitions.
 
 2. **Out Of Memory Error**  
-   *Problem:* Occurs when trying to collect too much data to the driver.  
-   *Solution:*
-      - Using sampling for analysis
-      - Implementing proper aggregations instead of collecting all data
+   *Problem:* Occurs when too much data is collected to the driver, leading to crashes.  
+   *Solution:*  
+   - Use sampling for analysis instead of collecting full datasets.  
+   - Apply aggregations and transformations at the executor level.  
 
-3. **Complex Join Issue**
-   *Problem:* Unintentional cross joins that can cause exponential data growth.
-   *Solution:* Implemented proper join conditions and demonstrated the difference in output size.
+3. **Complex Join Issues**  
+   *Problem:* Unintentional cross joins cause exponential data growth.  
+   *Solution:* Ensure correct join conditions and leverage broadcast joins where applicable.
 
 4. **Excessive Shuffling Issues**  
-   *Problem:* Incorrect number of shuffle partitions leading to poor performance.  
-   *Solution:* Dynamic partition calculation based on data size. Includes best practices for partition sizing (100MB-200MB per partition)
+   *Problem:* Improper shuffle partitioning degrades performance.  
+   *Solution:* Dynamically adjust shuffle partitions based on data size, ensuring each partition is 100MB-200MB.
 
 5. **UDF Performance Issues**  
-   *Problem:* Python UDFs incur serialization overhead and reduce performance.  
-   *Solution:* Replace UDFs with native Spark SQL functions where possible.
+   *Problem:* Python UDFs introduce serialization overhead, reducing performance.  
+   *Solution:* Replace UDFs with native Spark SQL functions or use Pandas UDFs where needed.
 
 6. **Null Values Handling**  
-   *Problem:* Collecting massive datasets to the driver causes memory exhaustion.  
-   *Solution:* Use actions like `take()` to limit data collection.
+   *Problem:* Null values can cause incorrect aggregations and filtering inefficiencies.  
+   *Solution:* Use `fillna()`, `dropna()`, or `coalesce()` to handle missing values efficiently.
 
 7. **Job Lineage Bloating**  
-   *Problem:* Heavy shuffle operations may lead to spills on disk and performance degradation.  
-   *Solution:* Optimize Spark configuration settings to better handle shuffles.
+   *Problem:* Excessive transformations and shuffling create long DAG lineage, increasing memory usage.  
+   *Solution:* Persist or checkpoint intermediate results to break lineage and improve performance.
 
 8. **Spark Streaming Issues**  
-   *Problem:* Recomputing the same transformations multiple times without caching.  
-   *Solution:* Cache intermediate results to avoid redundant computations.
+   *Problem:* Recomputing transformations multiple times leads to inefficiency.  
+   *Solution:* Cache intermediate results, optimize microbatch intervals, and use watermarking for stateful processing.
 
 9. **Broadcast Variable Misuse**  
-    *Problem:* Inadequate partition filtering leads to unnecessary data reads.  
-    *Solution:* Use early filtering or partition-aware reads to enforce pruning.
+   *Problem:* Broadcasting large datasets can overwhelm memory instead of improving performance.  
+   *Solution:* Only broadcast small lookup datasets and use `broadcast()` efficiently.
 
 10. **Too Many Small Files Leading to Performance Overhead**  
-   *Problem:* Numerous small files create a large number of tasks and I/O overhead.  
-   *Solution:* Combine small files by reducing partitions with `coalesce`.
+   *Problem:* Excessive small files generate high task overhead and I/O bottlenecks.  
+   *Solution:* Reduce partitions using `coalesce()` or write output with optimized partitioning strategies.
 
 ## Contributing
 
