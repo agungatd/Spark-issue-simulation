@@ -1,0 +1,100 @@
+1. DEMONSTRATING COMPLEX JOIN ISSUES
+===================================
+Creating datasets for join operations...
+Sample data:
+Customers:
++-----------+-----+-----------+------+
+|customer_id| name|       city|  tier|
++-----------+-----+-----------+------+
+|          1| John|   New York|  Gold|
+|          2|Alice|Los Angeles|Silver|
+|          3|  Bob|    Chicago|Bronze|
++-----------+-----+-----------+------+
+only showing top 3 rows
+
+Orders:
++--------+-----------+---------+------+
+|order_id|customer_id|  product|amount|
++--------+-----------+---------+------+
+|       1|          2|Product-1|  10.0|
+|       2|          3|Product-2|  20.0|
+|       3|          4|Product-3|  30.0|
++--------+-----------+---------+------+
+only showing top 3 rows
+
+Transactions (with nested structure):
++--------------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|transaction_id|customer_id|items                                                                                                                                                                                                                              |
++--------------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|1             |2          |[{quantity -> 1, price -> 0.0, product_id -> Product-0}, {quantity -> 2, price -> 10.0, product_id -> Product-1}]                                                                                                                  |
+|2             |3          |[{quantity -> 1, price -> 0.0, product_id -> Product-0}, {quantity -> 2, price -> 10.0, product_id -> Product-1}, {quantity -> 3, price -> 20.0, product_id -> Product-2}]                                                         |
+|3             |4          |[{quantity -> 1, price -> 0.0, product_id -> Product-0}, {quantity -> 2, price -> 10.0, product_id -> Product-1}, {quantity -> 3, price -> 20.0, product_id -> Product-2}, {quantity -> 4, price -> 30.0, product_id -> Product-3}]|
++--------------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+only showing top 3 rows
+
+
+Issue 1: Executing a complex multi-way join without optimization...
+Multi-way join completed in 3.29 seconds
+Result had 10000 rows
+
+Issue 2: Joining with complex nested data...
+Nested data join completed in 1.80 seconds
+Result had 15000 rows
+
+Issue 3: Join that creates an unintended cartesian product...
+Cartesian-like join completed in 1.19 seconds
+Result had 500 rows - potentially much larger than expected
+
+2. FIXING THE JOIN ISSUES
+===================================
+Solution 1: Optimize join order and use broadcast joins
+Optimized join completed in 0.91 seconds
+Improvement: 3.63x faster
+
+Solution 2: Pre-process nested data efficiently
+Optimized nested join completed in 1.64 seconds
+Improvement: 1.10x faster
+
+Solution 3: Avoid cartesian products with proper join conditions
+Proper join (avoiding cartesian) completed in 0.80 seconds
+Row count reduced from 500 to 0
+
+Solution 4: Use appropriate join types based on requirements
+Appropriate join type examples:
+Number of customers with no orders: 0
+Number of orders with missing customer data: 9900
+
+Solution 5: Analyze join plans with explain() to identify issues
+Example explain output for the optimized join:
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- BroadcastHashJoin [product#10], [product_id#16], Inner, BuildRight, false
+   :- Project [customer_id#9L, order_id#8L, product#10, amount#11, name#1, city#2, tier#3]
+   :  +- BroadcastHashJoin [customer_id#9L], [customer_id#0L], Inner, BuildRight, false
+   :     :- Filter (isnotnull(customer_id#9L) AND isnotnull(product#10))
+   :     :  +- Scan ExistingRDD[order_id#8L,customer_id#9L,product#10,amount#11]
+   :     +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, bigint, false]),false), [plan_id=2303]
+   :        +- Filter isnotnull(customer_id#0L)
+   :           +- Scan ExistingRDD[customer_id#0L,name#1,city#2,tier#3]
+   +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, false]),false), [plan_id=2307]
+      +- Filter isnotnull(product_id#16)
+         +- Scan ExistingRDD[product_id#16,category#17,supplier#18]
+
+
+
+Analyzing distribution of join keys (important for performance):
++-----------+-----+
+|customer_id|count|
++-----------+-----+
+|        474|   20|
+|         26|   20|
+|         29|   20|
+|        191|   20|
+|        418|   20|
++-----------+-----+
+only showing top 5 rows
+
+Max orders per customer: 20
+Average orders per customer: 2000.00
+
+Spark session stopped
