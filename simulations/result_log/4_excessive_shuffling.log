@@ -1,0 +1,38 @@
+1. DEMONSTRATING EXCESSIVE SHUFFLING ISSUES
+===================================
+Creating sample dataset...
+Sample data schema:
+root
+ |-- id: long (nullable = false)
+ |-- group_id: integer (nullable = true)
+ |-- value: double (nullable = false)
+
+
+Executing a pipeline with excessive shuffling...
+Pipeline with excessive shuffling completed in 3.07 seconds
+Result had 100 rows
+
+2. FIXING THE SHUFFLING ISSUES
+===================================
+Solution 1: Combine operations to reduce shuffles
+Optimized pipeline completed in 0.56 seconds
+Result had 100 rows
+Improvement: 5.48x faster
+
+Solution 2: Control the number of partitions
+Current shuffle partitions: 200
+Adjusted shuffle partitions: 20
+Partition-optimized pipeline completed in 0.45 seconds
+Improvement: 1.26x faster than previous optimization
+
+Solution 3: Use broadcast joins for small dataframes
+Regular join time: 0.64 seconds
+Broadcast join time: 0.48 seconds
+Improvement: 1.34x faster
+
+Solution 4: Use repartitioning strategically
+Repartitioning strategy time: 1.88 seconds
+
+Solution 5: Persist intermediate results that are used multiple times
+
+Spark session stopped
