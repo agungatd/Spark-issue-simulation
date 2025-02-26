@@ -89,6 +89,12 @@ The repository covers the following simulations:
    *Problem:* Excessive small files generate high task overhead and I/O bottlenecks.  
    *Solution:* Reduce partitions using `coalesce()` or write output with optimized partitioning strategies.
 
+11. **[Placeholder for future issue]**  
+   *Problem:* [Describe the problem concisely].  
+   *Solution:* [Provide a recommended solution].  
+
+**...and many more to come!**
+
 ## Contributing
 
 Contributions are welcome! If you have improvements, additional simulations, or suggestions, please open an issue or submit a pull request.
