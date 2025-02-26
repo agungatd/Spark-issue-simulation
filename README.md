@@ -4,7 +4,7 @@
 
 ## Overview
 
-This repository provides an end-to-end simulation of 10 common Apache Spark problems and their fixes. It includes sample code demonstrating typical errors—such as Task Serialization errors, Data Skew in Joins, OutOfMemory issues, and more—along with practical fixes. The project is intended as a learning tool to help Spark developers understand and resolve common performance and configuration issues in Spark applications.
+This repository provides an end-to-end simulation of 10 common Apache Spark problems and their fixes. It includes sample code demonstrating typical errors such as Task Serialization errors, Data Skew in Joins, OutOfMemory issues, etc. along with the practical fixes. The project is intended as a learning tool to help Spark developers understand and resolve common performance and configuration issues in Spark applications.
 
 ## Repository Structure
 
