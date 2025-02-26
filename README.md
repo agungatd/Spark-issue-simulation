@@ -24,13 +24,13 @@ This repository provides an end-to-end simulation of 10 common Apache Spark prob
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/agungatd/spark-issue-simulation.git
-   cd spark-issue-simulation
+   git clone https://github.com/agungatd/Spark-issue-simulation.git
+   cd Spark-issue-simulation
    ```
 
 2. **Start the Spark cluster using Docker Compose:**
    ```bash
-   docker-compose up
+   docker-compose up -d
    ```
    - The Spark master UI will be available at [http://localhost:9090](http://localhost:9090).
    - The first worker’s UI will be available at [http://localhost:8081](http://localhost:8081).
