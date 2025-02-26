@@ -1,64 +1,77 @@
-INFO:__main__:
-=== Problem 5: UDF Performance ===
-INFO:__main__:
-Bad approach - using UDF instead of spark built-in function:
-+---+-----+----------+
-| id|value|double_udf|
-+---+-----+----------+
-|  0|    4|         8|
-|  1|    8|        16|
-|  2|    5|        10|
-|  3|    9|        18|
-|  4|    6|        12|
-|  5|    6|        12|
-|  6|    7|        14|
-|  7|    8|        16|
-|  8|    1|         2|
-|  9|    1|         2|
-| 10|    7|        14|
-| 11|    7|        14|
-| 12|    3|         6|
-| 13|    3|         6|
-| 14|    1|         2|
-| 15|    6|        12|
-| 16|    4|         8|
-| 17|    5|        10|
-| 18|    6|        12|
-| 19|    7|        14|
-+---+-----+----------+
-only showing top 20 rows
+1. DEMONSTRATING UDF PERFORMANCE ISSUES
+===================================
+Creating sample dataset...
+Sample data created. Schema:
+root
+ |-- id: long (nullable = false)
+ |-- value: double (nullable = true)
+ |-- text: string (nullable = false)
 
-INFO:__main__:
-Issue Time taken: 3.55 seconds
-INFO:__main__:
-Solution - optimal shuffle partitions:
-+---+-----+--------------+
-| id|value|double_builtin|
-+---+-----+--------------+
-|  0|    4|             8|
-|  1|    8|            16|
-|  2|    5|            10|
-|  3|    9|            18|
-|  4|    6|            12|
-|  5|    6|            12|
-|  6|    7|            14|
-|  7|    8|            16|
-|  8|    1|             2|
-|  9|    1|             2|
-| 10|    7|            14|
-| 11|    7|            14|
-| 12|    3|             6|
-| 13|    3|             6|
-| 14|    1|             2|
-| 15|    6|            12|
-| 16|    4|             8|
-| 17|    5|            10|
-| 18|    6|            12|
-| 19|    7|            14|
-+---+-----+--------------+
-only showing top 20 rows
 
-INFO:__main__:
-Solution Time taken: 0.20 seconds
-INFO:__main__:
-=== End of Problem 5: UDF Performance ===
+Applying regular Python UDFs to dataset...
+Regular Python UDF execution took 2.40 seconds
+Processed 1,000,000 rows
+
+Sample output from UDFs:
++---+------------------+------+------------------+--------------+
+| id|             value|  text|             score|processed_text|
++---+------------------+------+------------------+--------------+
+|  0|               0.0|Item-0|               0.0|        ITEM-0|
+|  1|             12.34|Item-1|1.8224537228742295|        ITEM-1|
+|  2|             24.68|Item-2|1.2915329120028114|        ITEM-2|
+|  3|37.019999999999996|Item-3|0.6643849632954226|        ITEM-3|
+|  4|             49.36|Item-4|0.5071893416956001|        ITEM-4|
++---+------------------+------+------------------+--------------+
+only showing top 5 rows
+
+
+2. FIXING THE UDF PERFORMANCE ISSUES
+===================================
+
+Solution 1: Use built-in functions instead of UDFs
+Built-in functions execution took 0.29 seconds
+Improvement over regular UDF: 8.21x faster
+
+Sample output from built-in functions:
++---+------------------+------+--------------+------------------+
+| id|             value|  text|processed_text|      simple_score|
++---+------------------+------+--------------+------------------+
+|  0|               0.0|Item-0|        ITEM-0|               0.0|
+|  1|             12.34|Item-1|        ITEM-1|1.8224537228742295|
+|  2|             24.68|Item-2|        ITEM-2|1.2915329120028114|
+|  3|37.019999999999996|Item-3|        ITEM-3|0.6643849632954226|
+|  4|             49.36|Item-4|        ITEM-4|0.5071893416956001|
++---+------------------+------+--------------+------------------+
+only showing top 5 rows
+
+
+Solution 2: Use SQL expressions directly
+SQL expressions execution took 0.32 seconds
+Improvement over regular UDF: 7.60x faster
+
+Sample output from SQL expressions:
++---+------------------+------+------------------+--------------+
+| id|             value|  text|             score|processed_text|
++---+------------------+------+------------------+--------------+
+|  0|               0.0|Item-0|               0.0|        ITEM-0|
+|  1|             12.34|Item-1|1.8224537228742295|        ITEM-1|
+|  2|             24.68|Item-2|1.2915329120028114|        ITEM-2|
+|  3|37.019999999999996|Item-3|0.6643849632954226|        ITEM-3|
+|  4|             49.36|Item-4|0.5071893416956001|        ITEM-4|
++---+------------------+------+------------------+--------------+
+only showing top 5 rows
+
+
+Solution 3: Optimize Python UDF with caching for repeated values
+Cached UDF execution took 0.35 seconds on dataset with repeated values
+Improvement over regular UDF: 6.86x faster
+
+Solution 4: Use Scala UDFs or code generation for maximum performance
+For production systems with critical performance requirements:
+1. Implement UDFs in Scala instead of Python
+2. Use Spark's Catalyst code generation by registering Scala functions
+3. Consider implementing as a custom Spark operator for critical paths
+
+Solution 5 [!Not Implemented]: Use Pandas UDFs for vectorized execution
+
+Spark session stopped
