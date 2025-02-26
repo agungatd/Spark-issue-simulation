@@ -1,0 +1,153 @@
+1. DEMONSTRATING NULL HANDLING ISSUES
+===================================
+Creating dataset with null values...
+
+Sample data with null values:
++---+-------+----+------+
+| id|   name| age|salary|
++---+-------+----+------+
+|  1|  Alice|  30|5000.0|
+|  2|    Bob|NULL|6000.0|
+|  3|Charlie|  35|   NaN|
+|  4|   NULL|  40|7000.0|
+|  5|    Eve|  45|  NULL|
+|  6|  Frank|NULL|  NULL|
++---+-------+----+------+
+
+
+Issue 1: Incorrect filtering with nulls
+Trying to filter rows where age > 35:
+Result (missing nulls):
++---+----+---+------+
+| id|name|age|salary|
++---+----+---+------+
+|  4|NULL| 40|7000.0|
+|  5| Eve| 45|  NULL|
++---+----+---+------+
+
+
+Issue 2: Aggregations with nulls can be misleading
+Average age: 37.5
+Nulls are ignored in aggregations, which may not be what you want
+
+Issue 3: Join problems with nulls
+Join result (nulls don't match):
++---+-----+----+------+-----------+
+| id| name| age|salary| department|
++---+-----+----+------+-----------+
+|  1|Alice|  30|5000.0|         HR|
+|  2|  Bob|NULL|6000.0|Engineering|
+|  4| NULL|  40|7000.0|      Sales|
++---+-----+----+------+-----------+
+
+
+Issue 4: Equality comparisons with nulls
+ERROR OCCURRED: PySparkTypeError: [NOT_COLUMN_OR_STR] Argument `condition` should be a Column or str, got bool.
+
+This is related to null handling issues in Spark
+
+2. FIXING THE NULL HANDLING ISSUES
+===================================
+Solution 1: Proper null filtering
+Correctly filtering for nulls uses isNull() or isNotNull():
+Rows with null ages:
++---+-----+----+------+
+| id| name| age|salary|
++---+-----+----+------+
+|  2|  Bob|NULL|6000.0|
+|  6|Frank|NULL|  NULL|
++---+-----+----+------+
+
+
+Rows with age > 35 OR null:
++---+-----+----+------+
+| id| name| age|salary|
++---+-----+----+------+
+|  2|  Bob|NULL|6000.0|
+|  4| NULL|  40|7000.0|
+|  5|  Eve|  45|  NULL|
+|  6|Frank|NULL|  NULL|
++---+-----+----+------+
+
+
+Solution 2: Handle nulls in aggregations
+Count of non-null ages vs total rows:
++----------+-------------+---------+
+|total_rows|non_null_ages|null_ages|
++----------+-------------+---------+
+|         6|            4|        2|
++----------+-------------+---------+
+
+
+Custom average with nulls replaced by 0:
+Average age (with nulls as 0): 25.0
+
+Solution 3: Handle nulls in joins
+Using left join and filling nulls:
+Left join after filling nulls:
++---+-------+----+------+-----------+
+| id|   name| age|salary| department|
++---+-------+----+------+-----------+
+|  1|  Alice|  30|5000.0|         HR|
+|  3|Charlie|  35|   NaN|       NULL|
+|  2|    Bob|NULL|6000.0|Engineering|
+|  6|  Frank|NULL|  NULL|       NULL|
+|  5|    Eve|  45|  NULL|       NULL|
+|  4|   NULL|  40|7000.0|      Sales|
++---+-------+----+------+-----------+
+
+
+Solution 4: Proper null comparisons
+Correctly filtering for null values:
++---+-----+----+------+
+| id| name| age|salary|
++---+-----+----+------+
+|  2|  Bob|NULL|6000.0|
+|  6|Frank|NULL|  NULL|
++---+-----+----+------+
+
+
+Filtering for NaN values correctly:
++---+-------+---+------+
+| id|   name|age|salary|
++---+-------+---+------+
+|  3|Charlie| 35|   NaN|
++---+-------+---+------+
+
+
+Solution 5: Comprehensive null/NaN handling
+Missing value analysis for salary column:
++-----+-----+----+-------------+
+|total|nulls|nans|empty_strings|
++-----+-----+----+-------------+
+|    6|    2|   1|            0|
++-----+-----+----+-------------+
+
+
+Solution 6: Fill or drop nulls appropriately
+Data after filling nulls with appropriate values:
++---+-------+---+------+
+| id|   name|age|salary|
++---+-------+---+------+
+|  1|  Alice| 30|5000.0|
+|  2|    Bob| 37|6000.0|
+|  3|Charlie| 35|   0.0|
+|  4|Unknown| 40|7000.0|
+|  5|    Eve| 45|   0.0|
+|  6|  Frank| 37|   0.0|
++---+-------+---+------+
+
+
+Data after dropping rows with nulls in critical columns:
++---+-------+----+------+
+| id|   name| age|salary|
++---+-------+----+------+
+|  1|  Alice|  30|5000.0|
+|  2|    Bob|NULL|6000.0|
+|  3|Charlie|  35|   NaN|
+|  5|    Eve|  45|  NULL|
+|  6|  Frank|NULL|  NULL|
++---+-------+----+------+
+
+
+Spark session stopped
