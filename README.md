@@ -30,10 +30,33 @@ This repository provides an end-to-end simulation of 10 common Apache Spark prob
 
 2. **Start the Spark cluster using Docker Compose:**
    ```bash
-   docker-compose up -d
+   docker-compose --profile spark up -d
    ```
    - The Spark master UI will be available at [http://localhost:9090](http://localhost:9090).
-   - The first worker’s UI will be available at [http://localhost:8081](http://localhost:8081).
+
+3. **(Optional) Start HDFS for some issue**
+   ```bash
+   docker-compose --profile hdfs up -d
+   ```
+   - The Hadoop UI will be available at [http://localhost:9870](http://localhost:9870).
+
+   Then, pre-create the directory and set proper ownership and permissions. For instance:
+   ```bash
+   docker exec namenode hdfs dfs -mkdir -p /user/spark/checkpoints
+   docker exec namenode hdfs dfs -chown spark:supergroup /user/spark/checkpoints
+   docker exec namenode hdfs dfs -chmod 777 /user/spark/checkpoints
+   ```
+   Then update your Spark configuration to use this directory.
+   ```python
+   spark.sparkContext.setCheckpointDir("hdfs://<namenode>:<port>/user/spark/checkpoints")
+   ```
+   (Replace `<namenode>:<port>` with your actual namenode host and port.)
+
+   Often, Spark jobs write temporary files to the user’s home directory on HDFS. Make sure that the HDFS home directory for the spark user exists and has proper permissions:
+   ```bash
+   docker exec namenode hdfs dfs -mkdir -p /user/spark
+   docker exec namenode hdfs dfs -chown spark:supergroup /user/spark
+   ```
 
 ## Running the Simulations
 
