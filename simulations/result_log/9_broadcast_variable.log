@@ -1,0 +1,33 @@
+============== PROBLEM 1: BROADCAST VARIABLE MISUSE ==============
+Creating sample data...
+Demonstrating the problem - inefficient join without broadcast...
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- SortMergeJoin [product_id#7L], [product_id#0L], Inner
+   :- Sort [product_id#7L ASC NULLS FIRST], false, 0
+   :  +- Exchange hashpartitioning(product_id#7L, 200), ENSURE_REQUIREMENTS, [plan_id=21]
+   :     +- Filter isnotnull(product_id#7L)
+   :        +- Scan ExistingRDD[order_id#6L,product_id#7L,quantity#8L]
+   +- Sort [product_id#0L ASC NULLS FIRST], false, 0
+      +- Exchange hashpartitioning(product_id#0L, 200), ENSURE_REQUIREMENTS, [plan_id=22]
+         +- Filter isnotnull(product_id#0L)
+            +- Scan ExistingRDD[product_id#0L,product_name#1,price#2L]
+
+
+Non-broadcast count: 1000
+Time taken without broadcast: 29.84 seconds
+
+Implementing the solution - using broadcast join hint...
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- BroadcastHashJoin [product_id#7L], [product_id#0L], Inner, BuildRight, false
+   :- Filter isnotnull(product_id#7L)
+   :  +- Scan ExistingRDD[order_id#6L,product_id#7L,quantity#8L]
+   +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, bigint, false]),false), [plan_id=248]
+      +- Filter isnotnull(product_id#0L)
+         +- Scan ExistingRDD[product_id#0L,product_name#1,price#2L]
+
+
+Broadcast count: 1000
+Time taken with broadcast: 8.56 seconds
+Improvement: 3.48x faster

@@ -1,0 +1,11 @@
+
+============== PROBLEM 2: SMALL FILE PROBLEM ==============
+Creating many small dataframes to simulate small files...
+Demonstrating the problem - writing many small files...
+Small files count: 0
+Time taken with small files: 21.86 seconds
+
+Implementing the solution - using repartition to control file size...
+Optimal files count: 0
+Time taken with optimized files: 9.76 seconds
+Improvement: 2.24x faster
